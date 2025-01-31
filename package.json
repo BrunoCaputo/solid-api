@@ -11,7 +11,9 @@
     "migrate:dev": "prisma migrate dev",
     "studio": "prisma studio",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +28,8 @@
     "@rocketseat/eslint-config": "2.2.2",
     "@types/bcryptjs": "2.4.6",
     "@types/node": "22.10.10",
+    "@vitest/coverage-v8": "3.0.4",
+    "@vitest/ui": "3.0.4",
     "eslint": "8.57.1",
     "eslint-plugin-simple-import-sort": "12.1.1",
     "prisma": "6.2.1",
