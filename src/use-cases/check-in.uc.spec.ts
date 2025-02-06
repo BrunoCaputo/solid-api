@@ -1,17 +1,34 @@
+import { Gym } from '@prisma/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { CheckInsRepository } from '@/repositories/check-ins.repository'
+import { GymsRepository } from '@/repositories/gyms.repository'
 import { InMemoryCheckInsRepository } from '@/repositories/in-memory/check-ins.repository.im'
+import { InMemoryGymsRepository } from '@/repositories/in-memory/gyms.repository.im'
 
 import { CheckInUseCase } from './check-in.uc'
 
 let checkInsRepository: CheckInsRepository
+let gymsRepository: GymsRepository
 let checkInUseCase: CheckInUseCase
+let gym: Gym
 
 describe('Check In Use Case', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     checkInsRepository = new InMemoryCheckInsRepository()
-    checkInUseCase = new CheckInUseCase(checkInsRepository)
+    gymsRepository = new InMemoryGymsRepository()
+    checkInUseCase = new CheckInUseCase(checkInsRepository, gymsRepository)
+
+    gym = await gymsRepository.create({
+      id: 'gym-01',
+      title: 'Gym 01',
+      description: '',
+      latitude: 0,
+      longitude: 0,
+      phone: '',
+    })
+
+    console.log(gym)
 
     vi.useFakeTimers()
   })
@@ -24,6 +41,8 @@ describe('Check In Use Case', () => {
     const { checkIn } = await checkInUseCase.execute({
       userId: 'user-01',
       gymId: 'gym-01',
+      userLatitude: 0,
+      userLongitude: 0,
     })
 
     expect(checkIn.id).toEqual(expect.any(String))
@@ -34,6 +53,8 @@ describe('Check In Use Case', () => {
       return await checkInUseCase.execute({
         userId: 'user-01',
         gymId: 'gym-01',
+        userLatitude: 0,
+        userLongitude: 0,
       })
     }
 
@@ -43,6 +64,28 @@ describe('Check In Use Case', () => {
     vi.setSystemTime(new Date(2025, 1, 7, 18, 0, 0))
     const { checkIn } = await checkInFn()
 
-    await expect(checkIn.id).toEqual(expect.any(String))
+    expect(checkIn.id).toEqual(expect.any(String))
+  })
+
+  it('should not be able to check in on distant gym', async () => {
+    await gymsRepository.create({
+      id: 'gym-02',
+      title: 'Gym 02',
+      description: '',
+      latitude: 0,
+      longitude: 0,
+      phone: '',
+    })
+
+    const checkInFn = async () => {
+      return await checkInUseCase.execute({
+        userId: 'user-01',
+        gymId: 'gym-02',
+        userLatitude: 20,
+        userLongitude: 20,
+      })
+    }
+
+    await expect(checkInFn).rejects.toBeInstanceOf(Error)
   })
 })
