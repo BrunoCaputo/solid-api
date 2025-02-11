@@ -7,7 +7,7 @@ import { CheckInsRepository } from '../check-ins.repository'
 
 export class PrismaCheckInsRepository implements CheckInsRepository {
   async create(data: Prisma.CheckInUncheckedCreateInput) {
-    const checkIn: CheckIn = await prisma.checkIn.create({
+    const checkIn = await prisma.checkIn.create({
       data,
     })
 
