@@ -2,6 +2,7 @@ import request from 'supertest'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { app } from '@/app'
+import { createAndAuthenticateUser } from '@/utils/test/create-and-authenticate-user.util'
 
 describe('Create gym (e2e)', () => {
   beforeAll(async () => {
@@ -13,12 +14,19 @@ describe('Create gym (e2e)', () => {
   })
 
   it('should be able to create a gym', async () => {
-    const response = await request(app.server).post('/users').send({
-      name: 'John Doe',
-      email: 'johndoe@example.com',
-      password: '123456',
-    })
+    const { token } = await createAndAuthenticateUser(app)
 
-    expect(response.statusCode).toEqual(201)
+    const response = await request(app.server)
+      .post('/gyms')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: 'Gym 01',
+        description: 'Gym 01 description',
+        phone: '1199999999',
+        latitude: 0,
+        longitude: 0,
+      })
+
+    expect(response.statusCode).toBe(201)
   })
 })
